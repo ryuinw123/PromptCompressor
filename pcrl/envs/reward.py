@@ -100,3 +100,39 @@ class CombineRewardFunction(RewardFunction):
         rw_info = {'sim': similarity, 'comp': compress_rate}
         rewards = np.where(rw_info['sim'] > self._threshold, rw_info['comp'], self._lambda)
         return rewards, rw_info
+
+
+class BertCombineRewardFunction(RewardFunction):
+    def __init__(
+        self,
+        lamb: float,
+        threshold: float,
+        bert_type: str,
+    ) -> None:
+        super().__init__()
+        self._metric = evaluate.load("bertscore", keep_in_memory=True , lang="en" , model_type = "microsoft/deberta-xlarge-mnli")
+        self._lambda = lamb
+        self._threshold = threshold
+        self._bert_type = bert_type
+
+    def get_compress_ratio(self, infos: List[Dict[str, Any]], compressed_counts: List[int], fixed_counts: Dict[str, Any]):
+        base_counts = extract_values(infos, 'base_token_counts')
+        fixed_n_tokens = np.zeros(len(infos), dtype=np.int16)
+        for i, info in enumerate(infos):
+            for k, v in FIXED_TOKENS.items():
+                if v in info["base_prompt"]:
+                    fixed_n_tokens[i] += len(fixed_counts[k])
+        compress_rate = 1 - (np.array(compressed_counts) - fixed_n_tokens) / (np.array(base_counts) - fixed_n_tokens)
+        return compress_rate
+
+    def __call__(
+        self,
+        infos: List[Dict[str, Any]],
+        gen_output: Dict[str, Any],
+        fixed_tokens_dict: Dict[str, Any]) -> float:
+        similarity = np.array(self._metric.compute(predictions=extract_values(infos, "base_gen_texts"),
+                        references=gen_output["gen_texts"])[self._bert_type])
+        compress_rate = self.get_compress_ratio(infos, gen_output["compressed_token_counts"], fixed_tokens_dict)
+        rw_info = {'sim': similarity, 'comp': compress_rate}
+        rewards = np.where(rw_info['sim'] > self._threshold, rw_info['comp'], self._lambda)
+        return rewards, rw_info

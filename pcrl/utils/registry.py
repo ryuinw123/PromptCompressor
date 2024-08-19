@@ -13,7 +13,8 @@ from pcrl.utils.metric import (
 )
 from pcrl.envs.act_spaces import BaseActSpace, BatchFixedTokenAction
 from pcrl.envs.obs_spaces import BaseObsSpace, FixedTokenObservation, FixedWordObservation
-from pcrl.envs.reward import RewardFunction, MeteorRewardFunction, RougeRewardFunction, CombineRewardFunction
+from pcrl.envs.reward import RewardFunction, MeteorRewardFunction, RougeRewardFunction, CombineRewardFunction, \
+    BertCombineRewardFunction
 from pcrl.model.policy import BatchTokenPolicy
 
 
@@ -70,6 +71,7 @@ class RewardFunctionRegistry:
         "meteor": MeteorRewardFunction,
         "rouge": RougeRewardFunction,
         "combine": CombineRewardFunction,
+        "bert" : BertCombineRewardFunction,
     }
 
     @classmethod
