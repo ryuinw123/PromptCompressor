@@ -110,7 +110,7 @@ class BertCombineRewardFunction(RewardFunction):
         bert_type: str,
     ) -> None:
         super().__init__()
-        self._metric = evaluate.load("bertscore", keep_in_memory=True , lang="en" , model_type = "microsoft/deberta-xlarge-mnli")
+        self._metric = evaluate.load("bertscore", keep_in_memory=True)
         self._lambda = lamb
         self._threshold = threshold
         self._bert_type = bert_type
@@ -131,7 +131,7 @@ class BertCombineRewardFunction(RewardFunction):
         gen_output: Dict[str, Any],
         fixed_tokens_dict: Dict[str, Any]) -> float:
         similarity = np.array(self._metric.compute(predictions=extract_values(infos, "base_gen_texts"),
-                        references=gen_output["gen_texts"])[self._bert_type])
+                        references=gen_output["gen_texts"] , lang="en" , model_type = "microsoft/deberta-xlarge-mnli")[self._bert_type])
         compress_rate = self.get_compress_ratio(infos, gen_output["compressed_token_counts"], fixed_tokens_dict)
         rw_info = {'sim': similarity, 'comp': compress_rate}
         rewards = np.where(rw_info['sim'] > self._threshold, rw_info['comp'], self._lambda)
