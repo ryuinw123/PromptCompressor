@@ -16,7 +16,7 @@ reward_fn:
   args:
     threshold: 0.55
     lamb: -0.01
-    rouge_type: f1
+    bert_type: f1
 
 datapool:
   id: alpaca_plus
