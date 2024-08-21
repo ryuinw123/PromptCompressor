@@ -59,7 +59,7 @@ class BatchTokenPolicy(BasePolicy, ActorCriticWarmStartMixin):
             nn.Linear(1024, 4096, bias=True),
             nn.GELU(),
             nn.Linear(4096, self._base_model.config.hidden_size, bias=False),
-            nn.Linear(4096, 2, bias=True)
+            nn.Linear(self._base_model.config.hidden_size, 2, bias=True)
         )
         self._policy_model = nn.Sequential(*[
             encoder,
