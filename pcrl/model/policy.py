@@ -48,23 +48,21 @@ class BatchTokenPolicy(BasePolicy, ActorCriticWarmStartMixin):
             nn.Linear(self._base_model.config.hidden_size, 4096, bias=False),
             nn.GELU(),
             nn.Linear(4096, 1, bias=True)]).to('cuda')
-
-        encoder = nn.Sequential(
+        self._policy_model = nn.Sequential(*[
+            # Encoder part
             nn.Linear(self._base_model.config.hidden_size, 4096, bias=False),
             nn.GELU(),
             nn.Linear(4096, 1024, bias=True),
-            nn.GELU()
-        )
-        decoder = nn.Sequential(
+            nn.GELU(),
+
+            # Decoder part
             nn.Linear(1024, 4096, bias=True),
             nn.GELU(),
             nn.Linear(4096, self._base_model.config.hidden_size, bias=False),
-            nn.Linear(self._base_model.config.hidden_size, 2, bias=True)
-        )
-        self._policy_model = nn.Sequential(*[
-            encoder,
-            decoder
-        ]).to('cuda')
+            nn.GELU(),
+
+            # Final layer to output a vector of size 2
+            nn.Linear(self._base_model.config.hidden_size, 2, bias=True)]).to('cuda')
 
     def _setup_optimizer(self, optimizer_kwargs: Dict[str, Any],
                          weight_decay: float, optimizer_class: torch.optim):
