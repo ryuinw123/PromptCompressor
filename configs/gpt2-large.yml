@@ -14,7 +14,7 @@ gen_model:
 reward_fn:
   id: bert
   args:
-    threshold: 0.55
+    threshold: 0.70
     lamb: -0.01
     bert_type: f1
 
