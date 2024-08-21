@@ -33,6 +33,8 @@ class ActorCriticWarmStartMixin:
 
     def load_from_dict(self, state_dict: dict = None):
         if state_dict is not None:
+            print("default_dict = " , self._policy_model.state_dict())
+            print("load state dict from policy = " , state_dict["policy_model"])
             self._policy_model.load_state_dict(state_dict["policy_model"])
             self._value_model.load_state_dict(state_dict["value_model"])
             # self._value_head.load_state_dict(state_dict["value_head"])
